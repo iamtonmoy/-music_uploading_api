@@ -3,15 +3,21 @@ from werkzeug.utils import secure_filename
 from pymongo import MongoClient
 import os
 import mutagen
+from flask_cors import CORS
 
 app = Flask(__name__)
+
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), 'uploads')
-ALLOWED_EXTENSIONS = {'mp3', 'wav'}
+UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'uploads')
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+ALLOWED_EXTENSIONS = {'mp3', 'wav'} 
 
 # Connect to MongoDB
 client = MongoClient('mongodb://localhost:27017/')
-db = client['music_db']
-collection = db['music_metadata']
+db = client['gaan']
+collection = db['music']
 
 # Helper function to check if the file has an allowed extension
 def allowed_file(filename):
@@ -22,8 +28,8 @@ def allowed_file(filename):
 @app.route('/')
 def hello_world():
     return 'hello World'
-
-@app.route('/upload', methods=['POST'])
+ 
+@app.route('/upload', methods=['POST', 'GET'])
 def upload_file():
     if 'file' not in request.files:
         return jsonify({'error': 'No file part in the request'}), 400
@@ -50,7 +56,11 @@ def extract_metadata(filepath):
     except Exception as e:
         print(f'Error extracting metadata: {e}')
         title, file_type, genre, length, size = 'NA', 'NA', 'NA', 'NA', 'NA'
-    metadata = {'title': title, 'file_type': file_type, 'genre': genre, 'length': length, 'size': size}
+    metadata = {'title': title, 
+                'file_type': file_type, 
+                'genre': genre, 
+                'length': length, 
+                'size': size}
     return metadata
 
 if __name__ == '__main__':

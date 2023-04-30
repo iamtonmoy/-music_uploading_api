@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Music Metadata Uploader</title>
+</head>
+
+<body>
+    <h1>Upload Music File</h1>
+    <form id="upload-form" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file">
+        <input type="submit" value="Upload">
+    </form>
+    <div id="metadata"></div>
+    <script>
+        const form = document.getElementById('upload-form');
+        form.addEventListener('submit', event => {
+            event.preventDefault();
+            const fileInput = document.querySelector('input[type="file"]');
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('http://127.0.0.1:5000/upload', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(metadata => {
+                    const metadataDiv = document.getElementById('metadata');
+                    metadataDiv.innerHTML = '';
+                    for (const [key, value] of Object.entries(metadata)) {
+                        const p = document.createElement('p');
+                        p.textContent = `${key}: ${value}`;
+                        metadataDiv.appendChild(p);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    const metadataDiv = document.getElementById('metadata');
+                    metadataDiv.textContent = `Error: ${error.message}`;
+                });
+        });
+    </script>
+</body>
+
+</html>
