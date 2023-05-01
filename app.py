@@ -61,7 +61,8 @@ def extract_metadata(filepath):
                 'genre': genre, 
                 'length': length, 
                 'size': size}
-    return metadata
+    collection.insert_one(metadata)
+    return jsonify(metadata)
 
 if __name__ == '__main__':
     app.run(debug=True)
